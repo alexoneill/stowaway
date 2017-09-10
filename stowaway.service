@@ -1,0 +1,7 @@
+[Unit]
+Description=Stowaway Request Forwarding
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/stowaway
