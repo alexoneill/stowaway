@@ -4,6 +4,8 @@
 # Top level
 SRC := src
 OBJ := obj
+BIN := bin
+SYSTEMD := systemd
 
 EXEC_NAME := stowaway
 SYSTEMD_SERVICE := $(EXEC_NAME).service
@@ -22,13 +24,14 @@ CXXFLAGS := -Wall -fPIC -DPIC -I./$(SRC)
 ################################################################################
 
 # Basic functionality
-SUPPORT_C = $(shell cd $(SRC)/ && find * -name "*.cc" -type f 2>/dev/null)
+SUPPORT_C = $(shell cd $(SRC)/ \
+						    && find * -name "*.cc" -not -name "main.cc" -type f 2>/dev/null)
 SUPPORT_O = $(addprefix $(OBJ)/,$(SUPPORT_C:%.cc=%.o))
 
 all: CXXFLAGS += -Ofast
-all: init $(LIB_NAME) $(EXEC_NAME)
+all: init $(BIN)/$(EXEC_NAME)
 debug: CXXFLAGS += -DDEBUG -g -pg
-debug: init $(LIB_NAME) $(EXEC_NAME)
+debug: init $(BIN)/$(EXEC_NAME)
 
 $(OBJ)/%.o: $(SRC)/%.cc
 	@mkdir -p "$(dir $@)"
@@ -37,27 +40,27 @@ $(OBJ)/%.o: $(SRC)/%.cc
 ################################################################################
 
 # Executable
-$(EXEC_NAME): $(SUPPORT_O) main.cc
+$(BIN)/$(EXEC_NAME): $(SUPPORT_O) $(SRC)/main.cc
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@
 
 ################################################################################
 
 # Structure
-$(OBJ):
-	mkdir -p "$(OBJ)"
+$(OBJ) $(BIN):
+	mkdir -p "$(OBJ)" "$(BIN)"
 
 .PHONY: init
-init: $(OBJ)
+init: $(OBJ) $(BIN)
 
 .PHONY: clean
 clean:
-	rm -rf ./$(OBJ)/
-	rm -rf $(EXEC_NAME) gmon.out
+	rm -rf ./$(OBJ)/ ./$(BIN)/
+	rm -rf gmon.out
 
 # Distribute
 .PHONY: install
 install: all
 	mkdir -p $(PREFIX)/bin $(PREFIX)/lib/systemd/system
-	cp $(EXEC_NAME) $(PREFIX)/bin/
-	cp $(SYSTEMD_SERVICE) $(PREFIX)/lib/systemd/system/
+	cp $(BIN)/* $(PREFIX)/bin/
+	cp $(SYSTEMD)/* $(PREFIX)/lib/systemd/system/
 
