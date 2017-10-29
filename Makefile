@@ -21,6 +21,10 @@ endif
 CXX := g++
 CXXFLAGS := -Wall -fPIC -DPIC -I./$(SRC)
 
+PKGS := protobuf
+CXXFLAGS += $(shell pkg-config --cflags $(PKGS))
+LDFLAGS  := $(shell pkg-config --libs $(PKGS))
+
 ################################################################################
 
 # Basic functionality
