@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+package stowaway;
+
+message Host {
+  required
+
+  required bytes data = 2;
+}
